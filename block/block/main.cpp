@@ -213,7 +213,7 @@ void initGamescene(){
 	outtextxy(405, 375, "等级:");
 	sprintf_s(str, "%d", rank);
 	outtextxy(425, 405, str);
-	outtextxy(425, 405, str);
+	
 	settextstyle(22, 0, "楷体");
 
 	setcolor(LIGHTBLUE);
@@ -462,7 +462,7 @@ void move(){
 					}
 					else if (key_down == key){
 						//加速度
-						cutspeed = 50;
+						cutspeed = 30;
 			
 					}
 					else if (key==key_left){
@@ -507,6 +507,83 @@ void newblock(){
 	move();
 
 }
+
+void down(int x){
+	for (int i = x; i >0;i--){
+		for (int j = 0; j < 15;j++){
+		//消除第i行的第j列的方格消除
+			if (visit[i-1][j]){
+				visit[i][j] =1;
+				markcolor[i][j] = markcolor[i - 1][j];
+				setcolor(markcolor[i][j]);
+				outtextxy(20*j + min_x,  20*i + min_y, "■");
+
+			}
+			else{
+				visit[i][j] = 0;
+				setcolor(BLACK);
+				outtextxy( 20*j + min_x, 20 *i+ min_y, "■");
+			
+			}
+		
+		}
+	}
+			setcolor(BLACK);
+			for (int j = 0; j < 15;j++){
+			visit[0][j] = 0;
+			outtextxy( 20*j + min_x,  min_y, "■");
+			}
+	}
+	
+
+
+void addscore(int clearlines){
+	char str[10];
+	score += clearlines*10;
+	setcolor(RED);
+	outtextxy(405, 280, "分数:");
+	sprintf_s(str, "%d", score);
+	outtextxy(415, 310, str);
+}
+void updateGrade(){
+	char str[3];
+	//更新等级的提示 100分一级
+	rank = score / 30 ;  //升一级
+	outtextxy(405, 375, "等级:");
+	sprintf_s(str, "%d", rank);
+	outtextxy(425, 405, str);
+
+	//更新速度
+	speed = 500-rank*30;
+	if (speed<=100){
+		speed = 100;
+	
+	}
+
+}
+void  check(void){
+	int i, j;
+	int clearlines = 0;
+	
+	for (i = 29; i >= 0;i--){
+		// 检查第i行有没有满
+		for (j = 0; j < 15 && visit[i][j]; j++){
+		}
+			//执行到此处时，有两种情况：
+			// 1. 第i行没有满，即表示有空位 此时 j<15
+			// 2. 第i行已满了，此时 j>=15
+			if (j>=15){
+				down(i); //消除第i行 并把上面的行下移
+				i++;
+				clearlines++;
+			}
+		}
+		//更新分数
+	addscore(clearlines);
+	//更新等级(更新等级提示，更新等级速度)
+	updateGrade();
+
+	}
 int main(){
 	welcome();
 	initGamescene();
@@ -518,7 +595,7 @@ int main(){
 
 	while (1){
 		newblock();
-	
+		check();  //消除方块
 	
 	}
 	system("pause");
